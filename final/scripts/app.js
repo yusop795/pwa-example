@@ -1,30 +1,12 @@
 (function () {
   'use strict';
 
-  let appServerPublicKey = 'BONL83gwQ5TqcrC6UfQH2sWB0EDg09GqxFh5PbRg7TTl1iZQekisRNVLW_yn_SZvqWq0kKi75VSMBDLer-mRdZs';
-  let isSubscribed = false; 
-  let swRegist = null;
-
-  function urlB64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-      .replace(/\-/g, '+')
-      .replace(/_/g, '/');
-  
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-  
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-  }
-
   const app = {
     images: [],
     imageArea: document.getElementById('image-area')
   };
-  
+
+  /* UI 구성에 필요한 이미지... > 서비스 워커 등록으로 오프라인 테스트를 위한 스크립트 */
   /**
    * @description images에 있는 이미지들을 HTML에 생성하여 표시
    */
@@ -77,9 +59,37 @@
     }
   }
 
-  /*========== TODO: 아래에 Push 관련 로직 구현 ========== */
+
+
+  /* Firebase Cloud Messaging => FCM 다양한 플랫폼으로 푸시 알림을 전송할 수 있는 서비스 
+  1. 사용자가 웹 앱에 접속하여 알림을 구독할 경우 클라우드 메시징 서비스로 등록을 요청
+  2. 요청을 받은 클라우드 메시징 서비스는 해당 유저의 등록 정보를 제공
+  3. 유저는 클라우드 메시징 서비스로부터 받은 등록 정보를 애플리케이션 서버로 전송하여 추후 애플리케이션 서버가 나에게 알림을 보낼 수 있도록 함
+  >> 알림 받을 유저의 등록 정보가 필요하기 때문에
+  */
+  let appServerPublicKey = 'BBTDJX0gKuld5FvaExPrIM52Xwkn8vEqgu4Wzl4j5XdutPuymmpE6W6tBVOkcyA1JF5qCReF41N64y5NQ_DZdoQ';
+  /* 구독 여부 상태값을 담는 변수 */
+  let isSubscribed = false;
+  /* 서비스 워커가 등록되었을 경우 반환되는 객체 */
+  let swRegist = null;
+
+  function urlB64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
   // 구독 버튼 상태 갱신
-  function updateButton () {
+  function updateButton() {
     // TODO: 알림 권한 거부 처리
     if (Notification.permission === 'denied') {
       pushButton.textContent = 'Push Messaging Blocked';
@@ -98,7 +108,7 @@
   }
 
   // 구독 정보 갱신
-  function updateSubscription (subscription) {
+  function updateSubscription(subscription) {
     // TODO: 구독 정보 서버로 전송
 
     let detailArea = document.getElementById('subscription_detail')
@@ -112,26 +122,27 @@
   }
 
   // 알림 구독
-  function subscribe () {
+  function subscribe() {
     const applicationServerKey = urlB64ToUint8Array(appServerPublicKey);
     swRegist.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: applicationServerKey
     })
-    .then(subscription => {
-      console.log('User is subscribed.');
-      updateSubscription(subscription);
-      isSubscribed = true;
-      updateButton();
-    })
-    .catch(err => {
-      console.log('Failed to subscribe the user: ', err);
-      updateButton();
-    });
+      .then(subscription => {
+        console.log('User is subscribed.');
+        updateSubscription(subscription);
+        isSubscribed = true;
+        updateButton();
+      })
+      .catch(err => {
+        console.log('Failed to subscribe the user: ', err);
+        updateButton();
+      });
   }
 
   // 알림 구독 취소
-  function unsubscribe () {
+  /* 구독 취소와 동시에 화면단 UI 변경  */
+  function unsubscribe() {
     swRegist.pushManager.getSubscription()
       .then(subscription => {
         if (subscription) {
@@ -150,7 +161,7 @@
   }
 
   // Push 초기화
-  function initPush () {
+  function initPush() {
     const pushButton = document.getElementById('subscribe')
     pushButton.addEventListener('click', () => {
       if (isSubscribed) {
@@ -162,7 +173,7 @@
     });
 
     swRegist.pushManager.getSubscription()
-      .then(function(subscription) {
+      .then(function (subscription) {
         isSubscribed = !(subscription === null);
         updateSubscription(subscription);
 

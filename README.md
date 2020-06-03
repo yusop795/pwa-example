@@ -62,3 +62,22 @@
 - 이근혁
   - Github: [Geunhyeok LEE](https://github.com/leegeunhyeok)
   - E-Mail: [dev.ghlee@gmail.com](mailto:dev.ghlee@gmail.com)
+
+
+- manifest 속성 알아보기
+
+[ name, short_name ]
+1. name : 웹을 설치하게 되면 icon에 표시되는 이름.
+2. short_name : 사용자의 홈 화면 이나 name 을 보여주기에는 제한적인 장소에서 표시되는 이름.
+
+[ display ]
+웹 을 실행할때 브라우저 처럼 보일지 앱처럼 보일지 아에 전체화면으로 보일지 등의 대한 설정을 할 수 있음.
+해당 속성 옵션 값은 fullscreen, minimul-ui, standalone, browser로 설정 가능
+1. browser 일반 브라우저와 동일하게 보임 (위에 주소바 등 노출)
+2. standalone 다른 앱들처럼 최상단에 상태표시줄을 제외한 전체화면으로 보임.
+3. fullscreen 상태 표시줄도 제외한 전체화면으로 보여줌
+4. minimul-ui => 모바일 크롬 전용, 풀스크린이랑 비슷하지만 뒤로가기 새로고침 등 최소한의 영역만 제공
+
+[ orientation ]
+앱이 실행될 때 가로, 세로의 방향을 선택할 수 있음
+이 옵션은 선택사항
